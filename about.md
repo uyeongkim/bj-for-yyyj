@@ -84,13 +84,13 @@ key: page-about
   {% assign winner = day_users | first %}
   {% if winner %}
     {% assign winner_color = winner.name | hash | slice: 0, 6 %}
-    {% if forloop.index0 | modulo: 7 == 0 %}<tr>{% endif %}
+    {% if ((forloop.index0 | modulo: 7)) == 0 %}<tr>{% endif %}
     <td style="background-color: #{{ winner_color }};">{{ day | date: "%-d" }}</td>
-    {% if forloop.index0 | modulo: 7 == 6 %}</tr>{% endif %}
+    {% if (forloop.index0 | modulo: 7) == 6 %}</tr>{% endif %}
   {% else %}
-    {% if forloop.index0 | modulo: 7 == 0 %}<tr>{% endif %}
+    {% if ((forloop.index0 | modulo: 7)) == 0 %}<tr>{% endif %}
     <td>{{ day | date: "%-d" }}</td>
-    {% if forloop.index0 | modulo: 7 == 6 %}</tr>{% endif %}
+    {% if (forloop.index0 | modulo: 7) == 6 %}</tr>{% endif %}
   {% endif %}
 {% endfor %}
 
