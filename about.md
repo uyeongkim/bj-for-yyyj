@@ -2,21 +2,21 @@
 layout: article
 titles:
   # @start locale config
-  en      : &EN       About
+  en      : &EN       Status
   en-GB   : *EN
   en-US   : *EN
   en-CA   : *EN
   en-AU   : *EN
-  zh-Hans : &ZH_HANS  关于
+  zh-Hans : &ZH_HANS  
   zh      : *ZH_HANS
   zh-CN   : *ZH_HANS
   zh-SG   : *ZH_HANS
-  zh-Hant : &ZH_HANT  關於
+  zh-Hant : &ZH_HANT  
   zh-TW   : *ZH_HANT
   zh-HK   : *ZH_HANT
-  ko      : &KO       소개
+  ko      : &KO       현황
   ko-KR   : *KO
-  fr      : &FR       À propos
+  fr      : &FR       
   fr-BE   : *FR
   fr-CA   : *FR
   fr-CH   : *FR
@@ -25,50 +25,96 @@ titles:
   # @end locale config
 key: page-about
 ---
+# Competition Status
 
-![TeXt Theme](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/TeXt-home.jpg)
+## Current Standings
 
-TeXt is a super customizable Jekyll theme for personal site, team site, blog, project, documentation, etc. Similar to iOS 11 style, it has large and prominent titles, round buttons and cards.
+{% assign users = site.data.progress | map: "user" | uniq %}
+{% assign total_problems = site.data.progress | map: "problem_idx" | uniq | size %}
+{% assign total_successes = site.data.progress | where: "succeed", "TRUE" | map: "problem_idx" | uniq | size %}
 
-```javascript
-(() => console.log('Hello, World!'))();
+### Problems Attempted
+
+{% for user in users %}
+  {% assign user_problems = site.data.progress | where: "user", user | map: "problem_idx" | uniq | size %}
+  {% assign percentage = user_problems | times: 100.0 | divided_by: total_problems %}
+  {% assign full_hearts = percentage | divided_by: 10 | floor %}
+  {% assign half_heart = percentage | modulo: 10 | divided_by: 5 | floor %}
+  {% assign empty_hearts = 10 | minus: full_hearts | minus: half_heart %}
+  
+  {{ user }}: 
+  {% for i in (1..full_hearts) %}❤️{% endfor %}
+  {% if half_heart == 1 %}💔{% endif %}
+  {% for i in (1..empty_hearts) %}🖤{% endfor %}
+  ({{ user_problems }}/{{ total_problems }})
+{% endfor %}
+
+### Successful Submissions
+
+{% for user in users %}
+  {% assign user_successes = site.data.progress | where: "user", user | where: "succeed", "TRUE" | map: "problem_idx" | uniq | size %}
+  {% assign percentage = user_successes | times: 100.0 | divided_by: total_successes %}
+  {% assign full_hearts = percentage | divided_by: 10 | floor %}
+  {% assign half_heart = percentage | modulo: 10 | divided_by: 5 | floor %}
+  {% assign empty_hearts = 10 | minus: full_hearts | minus: half_heart %}
+  
+  {{ user }}: 
+  {% for i in (1..full_hearts) %}❤️{% endfor %}
+  {% if half_heart == 1 %}💔{% endif %}
+  {% for i in (1..empty_hearts) %}🖤{% endfor %}
+  ({{ user_successes }}/{{ total_successes }})
+{% endfor %}
+
+## Recent Activity Calendar
+
+{% assign today = site.time | date: "%Y-%m-%d" %}
+{% assign two_weeks_ago = today | date: "%s" | minus: 1209600 | date: "%Y-%m-%d" %}
+
+{% for user in users %}
+  {% assign user_color = user | hash | slice: 0, 6 %}
+  <span style="color: #{{ user_color }};">■</span> {{ user }}
+{% endfor %}
+
+| Sun | Mon | Tue | Wed | Thu | Fri | Sat |
+|-----|-----|-----|-----|-----|-----|-----|
+{% for i in (0..13) %}
+  {% assign day = two_weeks_ago | date: "%s" | plus: i | times: 86400 | date: "%Y-%m-%d" %}
+  {% assign day_entries = site.data.progress | where: "date", day %}
+  {% assign day_users = day_entries | group_by: "user" | sort: "size" | reverse %}
+  {% assign winner = day_users | first %}
+  {% if winner %}
+    {% assign winner_color = winner.name | hash | slice: 0, 6 %}
+    {% if forloop.index0 | modulo: 7 == 0 %}<tr>{% endif %}
+    <td style="background-color: #{{ winner_color }};">{{ day | date: "%-d" }}</td>
+    {% if forloop.index0 | modulo: 7 == 6 %}</tr>{% endif %}
+  {% else %}
+    {% if forloop.index0 | modulo: 7 == 0 %}<tr>{% endif %}
+    <td>{{ day | date: "%-d" }}</td>
+    {% if forloop.index0 | modulo: 7 == 6 %}</tr>{% endif %}
+  {% endif %}
+{% endfor %}
+
+# How to Add Your Accomplishment
+
+To add your accomplishment to the competition, follow these steps:
+
+1. Fork the repository if you haven't already.
+2. Navigate to the `_data` folder in your forked repository.
+3. Open the `progress.csv` file.
+4. Add a new row with the following information:
+   - `user`: Your GitHub username
+   - `date`: The date of your accomplishment (YYYY-MM-DD format)
+   - `problem_idx`: The index or identifier of the problem you solved
+   - `succeed`: Set to `TRUE` if you successfully solved the problem, `FALSE` otherwise
+5. Commit your changes with a meaningful commit message.
+6. Create a pull request to merge your changes into the main repository.
+
+Example row in `progress.csv`:
+```
+user,date,problem_idx,succeed
+johndoe,2024-08-23,problem42,TRUE
 ```
 
-## Features
+Once your pull request is reviewed and merged, the competition status will be automatically updated to reflect your accomplishment.
 
-- Responsive
-- Semantic HTML
-- Skins
-- Highlight Theme
-- Internationalization
-- Search
-- Table of contents
-- Authors
-- Additional styles (alert, tag, image, icon, button, grid, etc)
-- Extensions (audios, videos, slides, demos)
-- Markdown enhancements ([MathJax](https://www.mathjax.org/), [mermaid](https://mermaidjs.github.io/), [chartjs](http://www.chartjs.org/))
-- Sharing ([AddToAny](https://www.addtoany.com/), [AddThis](https://www.addthis.com/))
-- Comments ([Disqus](https://disqus.com/), [Gitalk](https://gitalk.github.io/), [Valine](https://valine.js.org/en/))
-- Pageview ([LeanCloud](https://leancloud.cn/))
-- Analytics ([Google Analytics](https://analytics.google.com/analytics/web/))
-- RSS ([jekyll-feed](https://github.com/jekyll/jekyll-feed))
-
-## Skins
-
-TeXt has 6 built-in skins, you can also set up your own skin.
-
-| `default` | `dark` | `forest` |
-| --- |  --- | --- |
-| ![Default](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/skins_default.jpg) | ![Dark](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/skins_dark.jpg) | ![Forest](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/skins_forest.jpg) |
-
-| `ocean` | `chocolate` | `orange` |
-| --- |  --- | --- |
-| ![Ocean](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/skins_ocean.jpg) | ![Chocolate](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/skins_chocolate.jpg) | ![Orange](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/skins_orange.jpg) |
-
-### Highlight Theme
-
-TeXt use [Tomorrow](https://github.com/chriskempson/tomorrow-theme) as the highlight theme.
-
-| `tomorrow` | `tomorrow-night` | `tomorrow-night-eighties` | `tomorrow-night-blue` | `tomorrow-night-bright` |
-| --- |  --- | --- | --- |  --- |
-| ![Tomorrow](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/highlight_tomorrow.png) | ![Tomorrow Night](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/highlight_tomorrow-night.png) | ![Tomorrow Night Eighties](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/highlight_tomorrow-night-eighties.png) | ![Tomorrow Night Blue](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/highlight_tomorrow-night-blue.png) | ![Tomorrow Night Bright](https://raw.githubusercontent.com/kitian616/jekyll-TeXt-theme/master/screenshots/highlight_tomorrow-night-bright.png) |
+Good luck and happy coding!
