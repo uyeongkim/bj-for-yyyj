@@ -82,15 +82,17 @@ key: page-about
   {% assign day_entries = site.data.progress | where: "date", day %}
   {% assign day_users = day_entries | group_by: "user" | sort: "size" | reverse %}
   {% assign winner = day_users | first %}
+  {% assign row_start = forloop.index0 | modulo: 7 %}
+  {% assign row_end = forloop.index0 | modulo: 7 | minus: 6 | abs %}
   {% if winner %}
     {% assign winner_color = winner.name | hash | slice: 0, 6 %}
-    {% if ((forloop.index0 | modulo: 7)) == 0 %}<tr>{% endif %}
+    {% if row_start == 0 %}<tr>{% endif %}
     <td style="background-color: #{{ winner_color }};">{{ day | date: "%-d" }}</td>
-    {% if (forloop.index0 | modulo: 7) == 6 %}</tr>{% endif %}
+    {% if row_end == 0 %}</tr>{% endif %}
   {% else %}
-    {% if ((forloop.index0 | modulo: 7)) == 0 %}<tr>{% endif %}
+    {% if row_start == 0 %}<tr>{% endif %}
     <td>{{ day | date: "%-d" }}</td>
-    {% if (forloop.index0 | modulo: 7) == 6 %}</tr>{% endif %}
+    {% if row_end == 0 %}</tr>{% endif %}
   {% endif %}
 {% endfor %}
 
